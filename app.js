@@ -14,21 +14,27 @@ bot.on("text", async ctx => {
     const videoInfo = await ytdl.getInfo(url);
     const audioReadableStream = ytdl(url, { quality: "highestaudio" });
     const videoTitle = videoInfo.videoDetails.title;
+    const videoThumbnail = videoInfo.videoDetails.thumbnails[0].url;
+
     if (videoInfo.videoDetails.category === "Music") {
       const extra = {
-        title: videoTitle,
-        performer: videoInfo.videoDetails.keywords[0],
         duration: videoInfo.videoDetails.lengthSeconds,
-        thumb: videoInfo.videoDetails.video_url,
+        title: videoTitle,
+        thumb: { url: videoThumbnail },
       };
-      return ctx.replyWithAudio({ source: audioReadableStream }, extra);
+      return ctx.replyWithAudio(
+        {
+          source: audioReadableStream,
+          filename: `${videoTitle}.mp3`,
+        },
+        extra
+      );
     }
-
-    const extra = {
-      title: videoTitle,
+    ctx.replyWithAudio({
+      source: audioReadableStream,
+      filename: `${videoTitle}.mp3`,
       duration: videoInfo.videoDetails.lengthSeconds,
-    };
-    ctx.replyWithAudio({ source: audioReadableStream }, extra);
+    });
   } catch (error) {
     console.error("Error:", error);
     ctx.reply("Error");
